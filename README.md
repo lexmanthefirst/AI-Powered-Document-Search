@@ -131,40 +131,6 @@ GET /documents/
 GET /documents/{document_id}
 ```
 
-## Project Structure
-
-```
-RAG-chatbot/
-├── app/
-│   ├── api/
-│   │   └── routes/
-│   │       ├── documents.py      # Document management endpoints
-│   │       └── query.py          # RAG query endpoint
-│   ├── core/
-│   │   ├── config.py             # Application settings
-│   │   ├── database.py           # Database configuration
-│   │   └── logging.py            # Structured logging
-│   ├── middleware/
-│   │   └── correlation_id.py    # Correlation ID middleware
-│   ├── models/
-│   │   ├── base.py               # Base models with CRUD
-│   │   └── document.py           # Document model
-│   ├── schemas/
-│   │   ├── document.py           # Document schemas
-│   │   └── query.py              # Query schemas
-│   ├── services/
-│   │   ├── ingestion.py          # Document ingestion logic
-│   │   ├── llm_service.py        # OpenRouter integration
-│   │   └── vector_store.py       # ChromaDB integration
-│   ├── utils/
-│   │   └── response.py           # Standard API responses
-│   └── main.py                   # Application entry point
-├── alembic/                      # Database migrations
-├── tests/                        # Test suite
-├── .env                          # Environment variables
-└── requirements.txt              # Python dependencies
-```
-
 ## Database Schema
 
 ### Documents Table
@@ -221,7 +187,3 @@ pytest tests/ -v
 
 ### Code Style
 Follow PEP 8 guidelines.
-
-## License
-
-MIT
