@@ -24,6 +24,7 @@ class LLMService:
         self.site_url = os.getenv("SITE_URL", "http://localhost:8000")
         self.site_name = settings.PROJECT_NAME
         
+        # OpenRouter client (for remote embeddings and LLM)
         if not self.api_key:
             logger.warning("OPENROUTER_API_KEY not set in environment variables")
         
@@ -31,10 +32,25 @@ class LLMService:
             base_url=self.base_url,
             api_key=self.api_key,
         )
+        
+        # Local embeddings setup
+        self.use_local_embeddings = settings.USE_LOCAL_EMBEDDINGS
+        self.local_model = None
+        
+        if self.use_local_embeddings:
+            logger.info("Initializing local embedding model (all-MiniLM-L6-v2)...")
+            from sentence_transformers import SentenceTransformer
+            self.local_model = SentenceTransformer('all-MiniLM-L6-v2')
+            logger.info("Local embedding model loaded successfully")
+        else:
+            logger.info(f"Using OpenRouter embeddings: {settings.EMBEDDING_MODEL}")
 
     async def get_embedding(self, text: str) -> list[float]:
         """
         Generate embeddings for the given text.
+        
+        Supports both local embeddings (sentence-transformers) and 
+        remote embeddings (OpenRouter). Switch via USE_LOCAL_EMBEDDINGS config.
         
         Args:
             text: Input text to embed
@@ -42,11 +58,27 @@ class LLMService:
         Returns:
             List of floats representing the embedding
         """
-        response = await self.client.embeddings.create(
-            model=settings.EMBEDDING_MODEL, 
-            input=text
-        )
-        return response.data[0].embedding
+        if self.use_local_embeddings:
+            # Local embedding using sentence-transformers
+            import asyncio
+            logger.debug("Generating local embedding")
+            
+            # Run in thread pool to avoid blocking the event loop
+            loop = asyncio.get_event_loop()
+            embedding = await loop.run_in_executor(
+                None,
+                self.local_model.encode,
+                text
+            )
+            return embedding.tolist()
+        else:
+            # Remote embedding via OpenRouter (original implementation)
+            logger.debug(f"Generating remote embedding via {settings.EMBEDDING_MODEL}")
+            response = await self.client.embeddings.create(
+                model=settings.EMBEDDING_MODEL, 
+                input=text
+            )
+            return response.data[0].embedding
 
     async def generate_answer(self, prompt: str) -> str:
         """

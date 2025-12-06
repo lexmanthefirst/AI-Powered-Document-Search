@@ -36,6 +36,9 @@ class Settings(BaseSettings):
     OPENROUTER_MODEL: str = "openai/gpt-3.5-turbo"
     EMBEDDING_MODEL: str = "text-embedding-ada-002"
     
+    # Set to True to use Local Embeddings instead of OpenRouter
+    USE_LOCAL_EMBEDDINGS: bool = False
+    
     # LLM Fallback Models (optional)
     FALLBACK_MODEL_1: Optional[str] = None
     FALLBACK_MODEL_2: Optional[str] = None
